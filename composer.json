@@ -1,0 +1,12 @@
+{
+    "name": "k-orolevsk-y/vk_education",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "k-orolevsk-y",
+            "email": "i@korolevsky.me"
+        }
+    ],
+    "require": {}
+}
