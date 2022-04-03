@@ -23,7 +23,7 @@
 
 		public function request(Server|Servers $server, array $params): Response {
 			if(!empty($params['id'])) {
-				$user = $server->findOne('users', 'WHERE `id` = ?', [ $params['id'] ]);
+				$user = $server->findOne('users', 'WHERE `id` = ? OR UPPER(`nickname`) = ?', [ $params['id'], mb_strtoupper($params['id']) ]);
 			} else {
 				$user_id = Authorization::getUserId($server, $params['access_token']);
 				$user = $server->findOne('users', 'WHERE `id` = ?', [ $user_id ]);

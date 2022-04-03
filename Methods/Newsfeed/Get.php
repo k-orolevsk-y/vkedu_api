@@ -38,7 +38,7 @@
 
 			foreach($newsfeed as $key => $post) {
 				if(empty($profiles[$post['user_id']])) {
-					$post_user = $server->select('SELECT id,first_name,last_name,photo_id FROM `users` WHERE `id` = ?', [ $post['user_id'] ])[0];
+					$post_user = $server->select('SELECT id,nickname,photo_id FROM `users` WHERE `id` = ?', [ $post['user_id'] ])[0];
 					$post_user['photo'] = Data::URL.($server->findOne('files', 'WHERE `file_id` = ?', [ $post_user['photo_id'] ])['filename'] ?? "Files/default.png");;
 					$profiles[$post_user['id']] = $post_user;
 				}

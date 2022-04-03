@@ -16,24 +16,24 @@
 			$api->addMethod(
 				method: "account.edit",
 				function: [$this, 'request'],
-				params: ['first_name', 'last_name'],
+				params: ['nickname'],
 				limits: [1, 0, 10]
 			);
 		}
 
 		public function request(Server|Servers $server, array $params): Response {
-			$first_name_len = iconv_strlen($params['first_name']);
-			$last_name_len = iconv_strlen($params['last_name']);
+			if(preg_match('/^[A-Za-z][A-Za-z0-9_]{5,14}$/', $params['nickname']) === false) {
+				return new Response(200, new ErrorResponse(1, 'Invalid nickname.'));
+			}
 
-			if($first_name_len < 2 || $last_name_len < 2 || $first_name_len > 25 || $last_name_len > 25) {
-				return new Response(200, new ErrorResponse(1, 'Invalid first_name or last_name.'));
+			$user = $server->findOne('users', 'WHERE UPPER(`nickname`) = ?', [ mb_strtoupper($params['nickname']) ]);
+			if(!$user->isNull()) {
+				return new Response(200, new ErrorResponse(2, "This nickname is taken."));
 			}
 			$user_id = Authorization::getUserId($server, $params['access_token']);
 
-
 			$user = $server->findOne('users', 'WHERE `id` = ?', [ $user_id ]);
-			$user['first_name'] = str_replace(' ', '', mb_convert_case($params['first_name'], MB_CASE_TITLE, "UTF-8"));
-			$user['last_name'] = str_replace(' ', '', mb_convert_case($params['last_name'], MB_CASE_TITLE, "UTF-8"));
+			$user['nickname'] = $params['nickname'];
 			$server->store($user);
 
 			$user = $user->getArrayCopy();

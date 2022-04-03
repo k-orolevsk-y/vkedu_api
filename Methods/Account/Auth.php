@@ -23,7 +23,7 @@
 		}
 
 		public function request(Server|Servers $server, array $params): Response {
-			$user = $server->findOne('users', 'WHERE `login` = ?', [ $params['login'] ]);
+			$user = $server->findOne('users', 'WHERE `login` = ? OR UPPER(`nickname`) = ?', [ $params['login'], mb_strtoupper($params['login']) ]);
 			if($user->isNull()) {
 				return new Response(200, new ErrorResponse(1, 'User not registered.'));
 			} elseif(!password_verify($params['password'], $user['password'])) {

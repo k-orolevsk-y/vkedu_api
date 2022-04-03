@@ -17,7 +17,7 @@
 			$api->addMethod(
 				method: "account.register",
 				function: [$this, 'request'],
-				params: ['login', 'password', 'first_name', 'last_name'],
+				params: ['login', 'password', 'nickname'],
 				limits: [3, 10, 20],
 				need_authorization: false
 			);
@@ -31,24 +31,21 @@
 
 			if(!filter_var($params['login'], FILTER_VALIDATE_EMAIL)) {
 				return new Response(200, new ErrorResponse(2, "Bad login."));
-			} elseif(iconv_strlen($params['password']) <=
-				6) {
+			} elseif(iconv_strlen($params['password']) <= 6) {
 				return new Response(200, new ErrorResponse(3, 'Bad password.'));
 			}
 
-			$first_name_len = iconv_strlen($params['first_name']);
-			$last_name_len = iconv_strlen($params['last_name']);
-
-			if($first_name_len < 2 || $last_name_len < 2 || $first_name_len > 25 || $last_name_len > 25) {
-				return new Response(200, new ErrorResponse(4, 'Invalid first_name or last_name.'));
+			if(preg_match('/^[A-Za-z][A-Za-z0-9_]{5,14}$/', $params['nickname']) === false) {
+				return new Response(200, new ErrorResponse(4, 'Invalid nickname.'));
 			}
 
-			$first_name = str_replace(' ', '', mb_convert_case($params['first_name'], MB_CASE_TITLE, "UTF-8"));
-			$last_name = str_replace(' ', '', mb_convert_case($params['last_name'], MB_CASE_TITLE, "UTF-8"));
+			$user = $server->findOne('users', 'WHERE UPPER(`nickname`) = ?', [ mb_strtoupper($params['nickname']) ]);
+			if(!$user->isNull()) {
+				return new Response(200, new ErrorResponse(5, "This nickname is taken."));
+			}
 
 			$user = $server->dispense('users');
-			$user['first_name'] = $first_name;
-			$user['last_name'] = $last_name;
+			$user['nickname'] = $params['nickname'];
 			$user['photo_id'] = 0;
 			$user['reg_time'] = time();
 			$user['reg_ip'] = Ip::get();
