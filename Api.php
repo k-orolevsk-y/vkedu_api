@@ -217,7 +217,7 @@
 			} elseif(empty($this->methods[$method_name])) {
 				return new Response(200, new ErrorResponse(404, "Unknown method requested."));
 			} elseif(!$servers->isConnected()) {
-				return new Response(200, new ErrorResponse(500, "Error connecting database, try later.", [ 'db' => [ 'error_message' => $servers->getErrorConnect() ] ]));
+				return new Response(500, new ErrorResponse(500, "Error connecting database, try later.", [ 'db' => [ 'error_message' => $servers->getErrorConnect() ] ]));
 			}
 
 			if($servers instanceof Servers) {
